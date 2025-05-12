@@ -22,6 +22,8 @@ app.use(express.json());
 
 app.use(cors());
 
+
+
 // app.use(cors({
 //   origin: function (origin, callback) {
 //     if (!origin || allowedOrigins.includes(origin)) {
@@ -32,6 +34,11 @@ app.use(cors());
 //   },
 //   credentials: true,
 // }));
+
+app.get('/', (req, res) => {
+  res.send('Backend is live!');
+});
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
