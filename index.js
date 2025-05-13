@@ -17,23 +17,26 @@ import nodemailer from "nodemailer";
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 const otpStore = new Map();
 const app = express();
-//const allowedOrigins = ['https://your-netlify-site.netlify.app'];
 app.use(express.json());
+const allowedOrigins = [
+  'https://sai-enterprises-sigma.vercel.app/',
+  'https://e-saienterprises.netlify.app/',
+];
 
-app.use(cors());
 
 
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true,
-// }));
 
 app.get('/', (req, res) => {
   res.send('Backend is live!');
@@ -45,16 +48,16 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.log('MongoDB connection error:', err));
 
-  
-  const transporter = nodemailer.createTransport({
+
+const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
     user: "abhishekshinde034@gmail.com",
-    pass: "wabxochcvtuwfqou", 
+    pass: "wabxochcvtuwfqou",
   },
 });
 
-  // Update transaction status
+// Update transaction status
 app.put('/stored-transactions/:id', async (req, res) => {
   try {
     const { status } = req.body;
@@ -75,7 +78,7 @@ app.delete('/stored-transactions/:id', async (req, res) => {
   }
 });
 
-  
+
 app.get("/all-transactions", async (req, res) => {
   try {
     const paymentIntents = await stripe.paymentIntents.list({
@@ -134,7 +137,7 @@ app.post("/login", async (req, res) => {
   } else {
     res.json({ success: false, message: "User does not exist" });
   }
- });
+});
 
 app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
@@ -193,7 +196,7 @@ app.post("/register", async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to send OTP." });
   }
- });
+});
 app.post("/reset-password", async (req, res) => {
   const { email, otp, newPassword } = req.body;
   const record = otpStore.get(email);
@@ -328,7 +331,7 @@ app.post("/create-payment-intent", async (req, res) => {
     await transaction.save();
 
     res.send({ clientSecret: paymentIntent.client_secret });
-    
+
   } catch (err) {
     console.error("Stripe error:", err);
     res.status(500).json({ error: "Payment initiation failed" });
