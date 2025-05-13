@@ -18,23 +18,21 @@ const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 const otpStore = new Map();
 const app = express();
 app.use(express.json());
+
 const allowedOrigins = [
-  'https://sai-enterprises-sigma.vercel.app/',
-  'https://e-saienterprises.netlify.app/',
+  'https://sai-enterprises-sigma.vercel.app',
+  'https://e-saienterprises.netlify.app',
 ];
-
-
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      return callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
 }));
 
 
