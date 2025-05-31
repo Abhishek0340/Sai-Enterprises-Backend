@@ -48,11 +48,19 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.log('MongoDB connection error:', err));
 
   
-  const transporter = nodemailer.createTransport({
+//   const transporter = nodemailer.createTransport({
+//   service: "Gmail",
+//   auth: {
+//     user: "abhishekshinde034@gmail.com",
+//     pass: "wabxochcvtuwfqou", 
+//   },
+// });
+
+ const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: "abhishekshinde034@gmail.com",
-    pass: "wabxochcvtuwfqou", 
+    user: process.env.Email_USER,
+    pass: process.env.App_Password, 
   },
 });
 
