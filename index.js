@@ -109,6 +109,21 @@ app.get("/all-transactions", async (req, res) => {
 });
 
 
+app.post('/adminsignup', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    const existingAdmin = await AdminModel.findOne({ email });
+    if (existingAdmin) return res.status(400).json({ msg: 'Email already in use' });
+
+    const newAdmin = new AdminModel({ name, email, password });
+    await newAdmin.save();
+
+    res.status(201).json({ msg: 'Admin registered successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Admin Login
 app.post("/adminlogin", async (req, res) => {
