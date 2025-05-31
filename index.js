@@ -15,7 +15,6 @@ import bcrypt from 'bcryptjs'
 
 
 
-
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 const otpStore = new Map();
 const app = express();
@@ -200,7 +199,7 @@ app.post("/register", async (req, res) => {
 
     // Send OTP email
     await transporter.sendMail({
-      from: "abhishekshinde034@gmail.com",
+      from: process.env.Email_USER,
       to: email,
       subject: "Your OTP Code",
       text: `Your OTP is: ${otp}`,
@@ -276,7 +275,7 @@ app.post("/send-reset-otp", async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: "your-email@gmail.com",
+      from: process.env.Email_USER,
       to: email,
       subject: "Password Reset OTP",
       text: `Your password reset OTP is: ${otp}`,
