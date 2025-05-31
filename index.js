@@ -113,7 +113,7 @@ app.get("/all-transactions", async (req, res) => {
 // Admin Login
 app.post("/adminlogin", async (req, res) => {
   const { email, password } = req.body;
-  const user = await SignupModel.findOne({ email });
+  const user = await AdminModel.findOne({ email });
 
   if (user) {
     if (user.password === password) {
@@ -124,7 +124,7 @@ app.post("/adminlogin", async (req, res) => {
       res.json({ success: false, message: "Incorrect password" });
     }
   } else {
-    res.json({ success: false, message: "User does not exist" });
+    res.json({ success: false, message: "Admin does not exist" });
   }
 });
 // User Login
