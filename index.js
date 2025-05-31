@@ -11,13 +11,15 @@ import Contact from './models/contact.js';
 import Transaction from './models/transaction.js';
 import AdminModel from './models/admin.js'
 import nodemailer from "nodemailer";
+import bcrypt from 'bcryptjs'
+
 
 
 
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 const otpStore = new Map();
 const app = express();
-//const allowedOrigins = ['https://your-netlify-site.netlify.app'];
+//const allowedOrigins = ['https://site.netlify.app'];
 app.use(express.json());
 
 app.use(cors());
@@ -177,11 +179,18 @@ app.post("/register", async (req, res) => {
   // Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Save OTP temporarily
-  otpStore.set(email, { otp, data: { name, email, password, mobile }, expires: Date.now() + 5 * 60 * 1000 }); // 5 mins
-
-  // Send email
   try {
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 salt rounds
+
+    // Save OTP temporarily with hashed password
+    otpStore.set(email, {
+      otp,
+      data: { name, email, password: hashedPassword, mobile },
+      expires: Date.now() + 5 * 60 * 1000, // 5 mins
+    });
+
+    // Send OTP email
     await transporter.sendMail({
       from: "abhishekshinde034@gmail.com",
       to: email,
@@ -191,9 +200,37 @@ app.post("/register", async (req, res) => {
 
     res.json({ success: true, message: "OTP sent to your email." });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Failed to send OTP." });
+    console.error("Registration Error:", err);
+    res.status(500).json({ success: false, message: "Failed to send OTP or hash password." });
   }
- });
+});
+
+
+// app.post("/register", async (req, res) => {
+//   const { name, email, password, mobile } = req.body;
+
+//   // Generate OTP
+//   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+//   // Save OTP temporarily
+//   otpStore.set(email, { otp, data: { name, email, password, mobile }, expires: Date.now() + 5 * 60 * 1000 }); // 5 mins
+
+//   // Send email
+//   try {
+//     await transporter.sendMail({
+//       from: "abhishekshinde034@gmail.com",
+//       to: email,
+//       subject: "Your OTP Code",
+//       text: `Your OTP is: ${otp}`,
+//     });
+
+//     res.json({ success: true, message: "OTP sent to your email." });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: "Failed to send OTP." });
+//   }
+//  });
+
+
 app.post("/reset-password", async (req, res) => {
   const { email, otp, newPassword } = req.body;
   const record = otpStore.get(email);
