@@ -504,13 +504,39 @@ app.get("/contacts", async (req, res) => {
   }
 });
 
-// Dashboard Summary Route
+// // Dashboard Summary Route
+// app.get("/dashboard-summary", async (req, res) => {
+//   try {
+//     const successfulTransactions = await Transaction.find({ status: "success" });
+//     const totalRevenue = successfulTransactions.reduce((sum, txn) => sum + txn.amount, 0);
+
+//     const totalOrders = await Order.countDocuments();
+//     const totalCustomers = await SignupModel.countDocuments();
+//     const totalProducts = await Product.countDocuments();
+
+//     // Get top 5 selling products (you need 'sold' field in product schema for this)
+//     const topProducts = await Product.find().sort({ sold: -1 }).limit(5).select("name sold");
+
+//     res.json({
+//       totalRevenue,
+//       totalOrders,
+//       totalCustomers,
+//       totalProducts,
+//       topProducts,
+//     });
+//   } catch (err) {
+//     console.error("Error fetching dashboard summary:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
 app.get("/dashboard-summary", async (req, res) => {
   try {
-    const successfulTransactions = await Transaction.find({ status: "success" });
-    const totalRevenue = successfulTransactions.reduce((sum, txn) => sum + txn.amount, 0);
+    // Only count orders with status "success"
+    const successfulOrders = await Order.find({ status: "success" });
+    const totalRevenue = successfulOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await Order.countDocuments({ status: "success" }); // Only successful orders
     const totalCustomers = await SignupModel.countDocuments();
     const totalProducts = await Product.countDocuments();
 
@@ -529,8 +555,6 @@ app.get("/dashboard-summary", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-
 
 
 
